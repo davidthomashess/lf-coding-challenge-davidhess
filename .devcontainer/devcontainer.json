@@ -14,7 +14,8 @@
         "Prisma.prisma",
         "mtxr.sqltools",
         "mtxr.sqltools-driver-mysql",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "csstools.postcss"
       ]
     }
   }
