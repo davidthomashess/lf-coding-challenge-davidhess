@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 
-function emailValidation(email: string) {
+const throwEx = (msg: string) => {
+  throw Error(msg);
+};
+
+const emailValidation = (email: string) => {
   const atIndex = email.indexOf("@");
   if (atIndex === -1 || atIndex === 0 || atIndex === email.length - 1) {
     return false; // No "@" or "@" at the beginning/end
@@ -14,16 +18,53 @@ function emailValidation(email: string) {
   }
 
   return true;
-}
+};
+
+const phoneValidation = (phone: string) => {
+  const numbers = phone.match(/\d/g)?.length || 0;
+
+  console.log("numbers: " + numbers);
+
+  if (numbers < 10) {
+    console.log("invalid phone");
+    return false;
+  }
+
+  console.log("valid phone");
+
+  return true;
+};
+
+const formatPhone = (value: string) => {
+  if (!value) return value;
+
+  const phone = value.replace(/[^\d]/g, "");
+  const phoneLength = phone.length;
+
+  if (phoneLength < 4) return phone;
+  if (phoneLength < 7) {
+    return `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
+  }
+  return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
+};
 
 export default function Form() {
   const [fName, setFName] = useState("");
+  const [fNameBlurred, setFNameBlurred] = useState(false);
+  const [isFNamePopulated, setIsFNamePopulated] = useState(true);
+
   const [lName, setLName] = useState("");
+  const [lNameBlurred, setLNameBlurred] = useState(false);
+  const [isLNamePopulated, setIsLNamePopulated] = useState(true);
 
   const [email, setEmail] = useState("");
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isEmailPopulated, setIsEmailPopulated] = useState(true);
+
+  const [phone, setPhone] = useState("");
+  const [isPhoneValid, setIsPhoneValid] = useState(true);
+  const [isPhonePopulated, setIsPhonePopulated] = useState(true);
 
   const handleFNameChange = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
@@ -32,37 +73,66 @@ export default function Form() {
     setFName(result);
   };
 
+  const handleFNameBlurred = () => {
+    if (fName === "") {
+      setIsFNamePopulated(false);
+    } else {
+      setIsFNamePopulated(true);
+    }
+    setFNameBlurred(true);
+  };
+
   const handleLNameChange = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
     const result = target.value.replace(/[^a-z]/gi, "");
 
+    setLNameBlurred(false);
+
     setLName(result);
   };
 
+  const handleLNameBlurred = () => {
+    if (lName === "") {
+      setIsLNamePopulated(false);
+    } else {
+      setIsLNamePopulated(true);
+    }
+    setLNameBlurred(true);
+  };
+
   const handleEmailChange = (event: React.SyntheticEvent) => {
-    console.log("handleEmailChange");
     const target = event.target as HTMLInputElement;
 
     setEmailBlurred(false);
 
     setEmail(target.value);
 
-    // const emailRegex = /^[A-Za-z0-9_!#$%&'*+\/=?`{|}~^.-]+@[A-Za-z0-9.-]+$/gm;
-    console.log(`What is email?: ${email}`);
-    console.log(`is email being set to valid?: ${emailValidation(email)}`);
     setIsEmailValid(emailValidation(email));
   };
 
   const handleEmailBlurred = () => {
     if (email === "") {
       setIsEmailPopulated(false);
+    } else {
+      setIsEmailPopulated(true);
     }
     setEmailBlurred(true);
   };
 
-  console.log(`emailBlurred: ${emailBlurred}`);
-  console.log(`isEmailValid: ${isEmailValid}`);
-  console.log(`isEmailPopulated: ${isEmailPopulated}`);
+  // const [phone, setPhone] = useState("");
+  // const [isPhoneValid, setIsPhoneValid] = useState(true);
+  // const [isPhonePopulated, setIsPhonePopulated] = useState(true);
+
+  const handlePhoneChange = (event: React.SyntheticEvent) => {
+    const target = event.target as HTMLInputElement;
+    const formattedPhone = formatPhone(target.value);
+
+    setPhone(formattedPhone);
+
+    setIsPhoneValid(phoneValidation(phone));
+  };
+
+  console.log(`phone: ${phone}`);
 
   return (
     <div className="grid place-content-center bg-light-grey-blue pb-5">
@@ -78,9 +148,17 @@ export default function Form() {
               name="fname"
               type="text"
               value={fName}
-              onChange={handleFNameChange}
+              onChange={(e) => handleFNameChange(e)}
+              onBlur={() => {
+                handleFNameBlurred();
+              }}
               data-testid="form-fname-input"
             />
+            <p className="text-red-600">
+              {fNameBlurred && !isFNamePopulated
+                ? "Your first name is empty!"
+                : ""}
+            </p>
           </label>
           <label data-testid="form-lname-label">
             <p data-testid="form-lname">Last Name</p>
@@ -89,9 +167,17 @@ export default function Form() {
               name="fname"
               type="text"
               value={lName}
-              onChange={handleLNameChange}
+              onChange={(e) => handleLNameChange(e)}
+              onBlur={() => {
+                handleLNameBlurred();
+              }}
               data-testid="form-lname-input"
             />
+            <p className="text-red-600">
+              {lNameBlurred && !isLNamePopulated
+                ? "Your last name is empty!"
+                : ""}
+            </p>
           </label>
         </div>
         <p data-testid="notify-question">
@@ -111,7 +197,7 @@ export default function Form() {
               name="email"
               type="text"
               value={email}
-              onChange={handleEmailChange}
+              onChange={(e) => handleEmailChange(e)}
               onBlur={() => {
                 handleEmailBlurred();
               }}
@@ -119,9 +205,11 @@ export default function Form() {
             />
             <p className="text-red-600">
               {emailBlurred
-                ? !isEmailValid && !isEmailPopulated
+                ? !isEmailPopulated
                   ? "Email is empty!"
-                  : "Invalid Email!"
+                  : !isEmailValid
+                  ? "Invalid Email!"
+                  : ""
                 : ""}
             </p>
           </label>
@@ -130,7 +218,12 @@ export default function Form() {
               <input type="checkbox" />
               Phone
             </p>
-            <input type="text" data-testid="form-phone-input" />
+            <input
+              type="text"
+              onChange={(e) => handlePhoneChange(e)}
+              value={phone}
+              data-testid="form-phone-input"
+            />
           </label>
         </div>
         <br />
