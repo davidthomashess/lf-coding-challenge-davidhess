@@ -12,6 +12,9 @@ const config: Config = {
         "dark-grey-blue": "#5F7579",
         "light-grey-blue": "#C0CCD1",
       },
+      fontFamily: {
+        xnumbers: ["xnumbers", "sans-serif"],
+      },
     },
   },
   plugins: [],

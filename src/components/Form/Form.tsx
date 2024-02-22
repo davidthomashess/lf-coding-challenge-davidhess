@@ -340,6 +340,7 @@ export default function Form() {
               Phone
             </p>
             <input
+              className="font-xnumbers"
               type="text"
               value={phone}
               onChange={(e) => handlePhoneChange(e)}
