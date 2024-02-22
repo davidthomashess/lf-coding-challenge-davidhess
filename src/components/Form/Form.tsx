@@ -55,33 +55,6 @@ interface SupervisorName {
 }
 
 export default function Form() {
-  const [supervisorData, setSupervisorData] = useState();
-
-  useEffect(() => {
-    fetch(
-      "https://o3m5qixdng.execute-api.us-east-1.amazonaws.com/api/supervisors"
-    )
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        const nameData = data
-          .map((result: { name: SupervisorName }) => {
-            setSupervisorData(nameData);
-          })
-          .catch((error: unknown) => {
-            if (error instanceof Error) {
-              console.error(error);
-            }
-          });
-      });
-  }, []);
-
-  const supervisorNames: [SupervisorName] =
-    supervisorData || throwEx("Supervisor data not found!");
-
-  console.log(supervisorNames);
-
   const [fName, setFName] = useState("");
   const [fNameBlurred, setFNameBlurred] = useState(false);
   const [isFNamePopulated, setIsFNamePopulated] = useState(true);
@@ -94,11 +67,82 @@ export default function Form() {
   const [emailBlurred, setEmailBlurred] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isEmailPopulated, setIsEmailPopulated] = useState(true);
+  const [emailCheck, setEmailCheck] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [phoneBlurred, setPhoneBlurred] = useState(false);
   const [isPhoneValid, setIsPhoneValid] = useState(true);
   const [isPhonePopulated, setIsPhonePopulated] = useState(true);
+  const [phoneCheck, setPhoneCheck] = useState(false);
+
+  const [supervisorData, setSupervisorData] = useState<SupervisorName[]>([]);
+  // const [supervisorNames, setSupervisorNames] = useState([]);
+  const [supervisor, setSupervisor] = useState("");
+
+  useEffect(() => {
+    fetch(
+      "https://o3m5qixdng.execute-api.us-east-1.amazonaws.com/api/supervisors"
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        const results = data.results;
+        // console.log(results);
+
+        const nameData = results.map((result: any) => {
+          return result.name;
+        });
+
+        // console.log(nameData);
+
+        setSupervisorData(nameData);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error) {
+          console.error(error);
+        }
+      });
+  }, []);
+
+  console.log("After useEffect!");
+  console.log(supervisorData);
+
+  const handleSupervisorNames = (event: React.SyntheticEvent) => {
+    const target = event.target as HTMLInputElement;
+    const result = target.value;
+    setSupervisor(result);
+  };
+
+  const getSupervisorDropDown = () => {
+    if (supervisorData !== undefined) {
+      const supervisorNames = supervisorData;
+      console.log(supervisorNames[0]);
+
+      const supervisors = supervisorNames.map((item, index) => {
+        return (
+          <option
+            key={index}
+            data-testid={`supervisor-${index}`}
+            value={`${item.first} ${item.last}`}
+          >{`${item.first} ${item.last}`}</option>
+        );
+      });
+
+      return (
+        <label>
+          <select
+            name="supervisors"
+            id="supervisors"
+            data-testid="supervisor-dropdown"
+          >
+            <option value="select">Select...</option>
+            {supervisors}
+          </select>
+        </label>
+      );
+    }
+  };
 
   const handleFNameChange = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
@@ -288,19 +332,7 @@ export default function Form() {
           className="grid place-content-center"
           data-testid="supervisor-dropdown-section"
         >
-          <label>
-            <select
-              name="supervisors"
-              id="supervisors"
-              data-testid="supervisor-dropdown"
-            >
-              <option value="select">Select...</option>
-              <option value="fredstark">Fred Stark</option>
-              <option value="mattgreen">Matt Green</option>
-              <option value="charliehue">Charlie Hue</option>
-              <option value="danluke">Dan Luke</option>
-            </select>
-          </label>
+          {getSupervisorDropDown()}
           <br />
           <input
             className="bg-dark-grey-blue text-white rounded"
