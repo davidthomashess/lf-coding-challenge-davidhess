@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import Select, { SingleValue } from "react-select";
 
 const throwEx = (msg: string) => {
   throw Error(msg);
@@ -97,38 +98,58 @@ export default function Form() {
       });
   }, []);
 
-  const handleSupervisorNames = (event: React.SyntheticEvent) => {
-    const target = event.target as HTMLInputElement;
-    const result = target.value;
-    setSupervisor(result);
+  const handleSupervisorNames = (
+    event: SingleValue<{ value: string; label: string }>
+  ) => {
+    const label = event?.label || throwEx("Supervisor name label is missing!");
+    setSupervisor(label);
   };
 
   const getSupervisorDropDown = () => {
-    if (supervisorData !== undefined) {
+    if (supervisorData !== undefined && supervisorData.length > 3) {
       const supervisorNames = supervisorData;
 
-      const supervisors = supervisorNames.map((item, index) => {
-        return (
-          <option
-            key={index}
-            data-testid={`supervisor-${index}`}
-            value={`${item.first} ${item.last}`}
-          >{`${item.first} ${item.last}`}</option>
-        );
+      // console.log("supervisorNames: " + supervisorNames);
+
+      const supervisors = supervisorNames.map((item) => {
+        const selectItems = {
+          value: `${item.first.toLowerCase()}${item.last.toLowerCase()}`,
+          label: `${item.first} ${item.last}`,
+        };
+        return selectItems;
       });
 
+      // console.log(supervisors);
+
+      // return (
+      //   <label>
+      //     <select
+      //       name="supervisors"
+      //       id="supervisors"
+      //       onChange={(e) => handleSupervisorNames(e)}
+      //       data-testid="supervisor-dropdown"
+      //     >
+      //       <option value="select">Select...</option>
+      //       {supervisors}
+      //     </select>
+      //   </label>
+      // );
+
+      // const supervisors = supervisorNames.map((item) => {
+      //   return {
+      //     value: `${item.first.toLowerCase()}${item.last.toLowerCase()}`,
+      //     label: `${item.first} ${item.last}`,
+      //   };
+      // });
+
+      // console.log("supervisors: " + supervisorNames);
+
       return (
-        <label>
-          <select
-            name="supervisors"
-            id="supervisors"
-            onChange={(e) => handleSupervisorNames(e)}
-            data-testid="supervisor-dropdown"
-          >
-            <option value="select">Select...</option>
-            {supervisors}
-          </select>
-        </label>
+        <Select
+          className="w-48"
+          options={supervisors}
+          onChange={(e) => handleSupervisorNames(e)}
+        />
       );
     }
   };
@@ -250,6 +271,7 @@ export default function Form() {
           <label className="pr-0 md:pr-9" data-testid="form-fname-label">
             <p data-testid="form-fname">First Name</p>
             <input
+              className="w-48"
               id="fname"
               name="fname"
               type="text"
@@ -269,6 +291,7 @@ export default function Form() {
           <label data-testid="form-lname-label">
             <p data-testid="form-lname">Last Name</p>
             <input
+              className="w-48"
               id="lname"
               name="fname"
               type="text"
@@ -306,6 +329,7 @@ export default function Form() {
               Email
             </p>
             <input
+              className="w-48"
               id="email"
               name="email"
               type="text"
@@ -340,7 +364,7 @@ export default function Form() {
               Phone
             </p>
             <input
-              className="font-xnumbers"
+              className="font-xnumbers w-48"
               type="text"
               value={phone}
               onChange={(e) => handlePhoneChange(e)}
@@ -367,13 +391,13 @@ export default function Form() {
         </div>
         <br />
         <div
-          className="grid place-content-center"
+          className="grid justify-items-center"
           data-testid="supervisor-dropdown-section"
         >
           {getSupervisorDropDown()}
           <br />
           <input
-            className="bg-dark-grey-blue text-white rounded cursor-pointer"
+            className="bg-dark-grey-blue text-white rounded cursor-pointer w-28"
             type="submit"
             value="Submit"
             data-testid="submit-btn"
