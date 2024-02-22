@@ -24,6 +24,6 @@ _You can open the Dev Tools console to verify that the submit function captured 
 
 The application is dockerized with Visual Studio Code Dev Containers.
 
-The app uses TypeScript for type safety and Tailwind CSS for styling elements.
+This web application was built with the Next.js React framework, TypeScript for type safety, and Tailwind CSS for styling elements.
 
 The application is built with a mobile first approach for mobile view
