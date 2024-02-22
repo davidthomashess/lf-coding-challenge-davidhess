@@ -23,14 +23,9 @@ const emailValidation = (email: string) => {
 const phoneValidation = (phone: string) => {
   const numbers = phone.match(/\d/g)?.length || 0;
 
-  console.log("numbers: " + numbers);
-
   if (numbers < 9) {
-    console.log("invalid phone");
     return false;
   }
-
-  console.log("valid phone");
 
   return true;
 };
@@ -102,9 +97,6 @@ export default function Form() {
       });
   }, []);
 
-  // console.log("After useEffect!");
-  // console.log(supervisorData);
-
   const handleSupervisorNames = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
     const result = target.value;
@@ -114,7 +106,6 @@ export default function Form() {
   const getSupervisorDropDown = () => {
     if (supervisorData !== undefined) {
       const supervisorNames = supervisorData;
-      // console.log(supervisorNames[0]);
 
       const supervisors = supervisorNames.map((item, index) => {
         return (
@@ -233,28 +224,18 @@ export default function Form() {
     setPhoneBlurred(true);
   };
 
-  // console.log("Check Boxes");
-  // console.log("Phone check: " + phoneCheck);
-  // console.log("Email check: " + emailCheck);
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    console.log("I am submitted!");
-    console.log("fName: " + fName);
-    console.log("lName: " + lName);
-    console.log("email: " + email);
-    console.log("phone: " + phone);
-    console.log("supervisor: " + supervisor);
     const postData = [fName, lName, email, phone, supervisor];
-    console.log("postData: " + postData);
 
     fetch("https://o3m5qixdng.execute-api.us-east-1.amazonaws.com/api/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(postData),
     }).then(() => {
-      console.log("Form data added!");
+      console.log("I am submitted!");
+      console.log("Form data sent!");
     });
   };
 
