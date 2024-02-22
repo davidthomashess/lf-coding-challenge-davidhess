@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 
 const throwEx = (msg: string) => {
   throw Error(msg);
@@ -77,7 +77,7 @@ export default function Form() {
 
   const [supervisorData, setSupervisorData] = useState<SupervisorName[]>([]);
   // const [supervisorNames, setSupervisorNames] = useState([]);
-  const [supervisor, setSupervisor] = useState("");
+  const [supervisor, setSupervisor] = useState("select");
 
   useEffect(() => {
     fetch(
@@ -88,13 +88,10 @@ export default function Form() {
       })
       .then((data) => {
         const results = data.results;
-        // console.log(results);
 
         const nameData = results.map((result: any) => {
           return result.name;
         });
-
-        // console.log(nameData);
 
         setSupervisorData(nameData);
       })
@@ -105,8 +102,8 @@ export default function Form() {
       });
   }, []);
 
-  console.log("After useEffect!");
-  console.log(supervisorData);
+  // console.log("After useEffect!");
+  // console.log(supervisorData);
 
   const handleSupervisorNames = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
@@ -117,7 +114,7 @@ export default function Form() {
   const getSupervisorDropDown = () => {
     if (supervisorData !== undefined) {
       const supervisorNames = supervisorData;
-      console.log(supervisorNames[0]);
+      // console.log(supervisorNames[0]);
 
       const supervisors = supervisorNames.map((item, index) => {
         return (
@@ -134,6 +131,7 @@ export default function Form() {
           <select
             name="supervisors"
             id="supervisors"
+            onChange={(e) => handleSupervisorNames(e)}
             data-testid="supervisor-dropdown"
           >
             <option value="select">Select...</option>
@@ -178,6 +176,13 @@ export default function Form() {
     setLNameBlurred(true);
   };
 
+  const handleEmailCheck = (event: React.SyntheticEvent) => {
+    const target = event.target as HTMLInputElement;
+    const checked = target.checked;
+    setEmailCheck(checked);
+    setPhoneCheck(false);
+  };
+
   const handleEmailChange = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
 
@@ -201,6 +206,13 @@ export default function Form() {
   // const [isPhoneValid, setIsPhoneValid] = useState(true);
   // const [isPhonePopulated, setIsPhonePopulated] = useState(true);
 
+  const handlePhoneCheck = (event: React.SyntheticEvent) => {
+    const target = event.target as HTMLInputElement;
+    const checked = target.checked;
+    setPhoneCheck(checked);
+    setEmailCheck(false);
+  };
+
   const handlePhoneChange = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
     const formattedPhone = formatPhone(target.value);
@@ -221,11 +233,34 @@ export default function Form() {
     setPhoneBlurred(true);
   };
 
-  console.log(`phone: ${phone}`);
+  // console.log("Check Boxes");
+  // console.log("Phone check: " + phoneCheck);
+  // console.log("Email check: " + emailCheck);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    console.log("I am submitted!");
+    console.log("fName: " + fName);
+    console.log("lName: " + lName);
+    console.log("email: " + email);
+    console.log("phone: " + phone);
+    console.log("supervisor: " + supervisor);
+    const postData = [fName, lName, email, phone, supervisor];
+    console.log("postData: " + postData);
+
+    fetch("https://o3m5qixdng.execute-api.us-east-1.amazonaws.com/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(postData),
+    }).then(() => {
+      console.log("Form data added!");
+    });
+  };
 
   return (
     <div className="grid place-content-center bg-light-grey-blue pb-5">
-      <form>
+      <form onSubmit={(e) => handleSubmit(e)}>
         <div
           className="flex flex-col md:flex-row pb-9 pt-5 md:pt-9"
           data-testid="name-input-section"
@@ -278,7 +313,14 @@ export default function Form() {
         >
           <label className="pr-0 md:pr-9" data-testid="form-email-label">
             <p data-testid="form-email">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                name="emailcheckbox"
+                id="emailcheckbox"
+                checked={emailCheck}
+                onChange={(e) => handleEmailCheck(e)}
+                data-testid="emailcheckbox"
+              />
               Email
             </p>
             <input
@@ -291,9 +333,10 @@ export default function Form() {
                 handleEmailBlurred();
               }}
               data-testid="form-email-input"
+              disabled={!emailCheck}
             />
             <p className="text-red-600">
-              {emailBlurred
+              {emailBlurred && emailCheck
                 ? !isEmailPopulated
                   ? "Email is empty!"
                   : !isEmailValid
@@ -304,7 +347,14 @@ export default function Form() {
           </label>
           <label data-testid="form-phone-label">
             <p data-testid="form-phone">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                name="phonecheckbox"
+                id="emailcheckbox"
+                checked={phoneCheck}
+                onChange={(e) => handlePhoneCheck(e)}
+                data-testid="phonecheckbox"
+              />
               Phone
             </p>
             <input
@@ -315,15 +365,20 @@ export default function Form() {
                 handlePhoneBlurred();
               }}
               data-testid="form-phone-input"
+              disabled={!phoneCheck}
             />
             <p className="text-red-600">
-              {phoneBlurred
-                ? !isPhonePopulated
-                  ? "Email is empty!"
-                  : !isPhoneValid
-                  ? "Invalid Email!"
-                  : ""
-                : ""}
+              {phoneBlurred && phoneCheck ? (
+                !isPhonePopulated ? (
+                  "Phone number is empty!"
+                ) : !isPhoneValid ? (
+                  "Invalid phone number!"
+                ) : (
+                  ""
+                )
+              ) : (
+                <br />
+              )}
             </p>
           </label>
         </div>
@@ -335,7 +390,7 @@ export default function Form() {
           {getSupervisorDropDown()}
           <br />
           <input
-            className="bg-dark-grey-blue text-white rounded"
+            className="bg-dark-grey-blue text-white rounded cursor-pointer"
             type="submit"
             value="Submit"
             data-testid="submit-btn"
