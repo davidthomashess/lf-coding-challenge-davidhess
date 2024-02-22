@@ -1,53 +1,12 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-
-const throwEx = (msg: string) => {
-  throw Error(msg);
-};
-
-const emailValidation = (email: string) => {
-  const atIndex = email.indexOf("@");
-  if (atIndex === -1 || atIndex === 0 || atIndex === email.length - 1) {
-    return false; // No "@" or "@" at the beginning/end
-  }
-
-  const domain = email.substring(atIndex + 1);
-  if (domain.indexOf(".") === -1) {
-    return false; // No "." in the domain
-  }
-
-  return true;
-};
-
-const phoneValidation = (phone: string) => {
-  const numbers = phone.match(/\d/g)?.length || 0;
-
-  if (numbers < 9) {
-    return false;
-  }
-
-  return true;
-};
-
-const formatPhone = (value: string) => {
-  if (!value) return value;
-
-  const phone = value.replace(/[^\d]/g, "");
-  const phoneLength = phone.length;
-
-  if (phoneLength < 4) return phone;
-  if (phoneLength < 7) {
-    return `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
-  }
-  return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
-};
-
-interface SupervisorName {
-  title: string;
-  first: string;
-  last: string;
-}
+import Select, { SingleValue } from "react-select";
+import throwEx from "@/Functions/Throw/throwEx";
+import emailValidation from "./FormFunctions/emailValidation";
+import phoneValidation from "./FormFunctions/phoneValidation";
+import formatPhone from "./FormFunctions/formatPhone";
+import { SupervisorName } from "./FormTypes/SupervisorName";
 
 export default function Form() {
   const [fName, setFName] = useState("");
@@ -71,7 +30,6 @@ export default function Form() {
   const [phoneCheck, setPhoneCheck] = useState(false);
 
   const [supervisorData, setSupervisorData] = useState<SupervisorName[]>([]);
-  // const [supervisorNames, setSupervisorNames] = useState([]);
   const [supervisor, setSupervisor] = useState("select");
 
   useEffect(() => {
@@ -97,38 +55,31 @@ export default function Form() {
       });
   }, []);
 
-  const handleSupervisorNames = (event: React.SyntheticEvent) => {
-    const target = event.target as HTMLInputElement;
-    const result = target.value;
-    setSupervisor(result);
+  const handleSupervisorNames = (
+    event: SingleValue<{ value: string; label: string }>
+  ) => {
+    const label = event?.label || throwEx("Supervisor name label is missing!");
+    setSupervisor(label);
   };
 
   const getSupervisorDropDown = () => {
-    if (supervisorData !== undefined) {
+    if (supervisorData !== undefined && supervisorData.length > 3) {
       const supervisorNames = supervisorData;
 
-      const supervisors = supervisorNames.map((item, index) => {
-        return (
-          <option
-            key={index}
-            data-testid={`supervisor-${index}`}
-            value={`${item.first} ${item.last}`}
-          >{`${item.first} ${item.last}`}</option>
-        );
+      const supervisors = supervisorNames.map((item) => {
+        const selectItems = {
+          value: `${item.first.toLowerCase()}${item.last.toLowerCase()}`,
+          label: `${item.first} ${item.last}`,
+        };
+        return selectItems;
       });
 
       return (
-        <label>
-          <select
-            name="supervisors"
-            id="supervisors"
-            onChange={(e) => handleSupervisorNames(e)}
-            data-testid="supervisor-dropdown"
-          >
-            <option value="select">Select...</option>
-            {supervisors}
-          </select>
-        </label>
+        <Select
+          className="w-48"
+          options={supervisors}
+          onChange={(e) => handleSupervisorNames(e)}
+        />
       );
     }
   };
@@ -193,10 +144,6 @@ export default function Form() {
     setEmailBlurred(true);
   };
 
-  // const [phone, setPhone] = useState("");
-  // const [isPhoneValid, setIsPhoneValid] = useState(true);
-  // const [isPhonePopulated, setIsPhonePopulated] = useState(true);
-
   const handlePhoneCheck = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
     const checked = target.checked;
@@ -227,8 +174,14 @@ export default function Form() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const postData = [fName, lName, email, phone, supervisor];
-    console.log(`Submitted data captured: ${postData}`);
+    const postData = [
+      fName,
+      lName,
+      `${emailCheck ? email : ""}`,
+      `${phoneCheck ? phone : ""}`,
+      supervisor,
+    ];
+    console.log(`Data captured: ${postData}`);
 
     fetch("https://o3m5qixdng.execute-api.us-east-1.amazonaws.com/api/submit", {
       method: "POST",
@@ -250,6 +203,7 @@ export default function Form() {
           <label className="pr-0 md:pr-9" data-testid="form-fname-label">
             <p data-testid="form-fname">First Name</p>
             <input
+              className="w-48"
               id="fname"
               name="fname"
               type="text"
@@ -269,6 +223,7 @@ export default function Form() {
           <label data-testid="form-lname-label">
             <p data-testid="form-lname">Last Name</p>
             <input
+              className="w-48"
               id="lname"
               name="fname"
               type="text"
@@ -306,6 +261,7 @@ export default function Form() {
               Email
             </p>
             <input
+              className="w-48"
               id="email"
               name="email"
               type="text"
@@ -340,6 +296,7 @@ export default function Form() {
               Phone
             </p>
             <input
+              className="font-xnumbers w-48"
               type="text"
               value={phone}
               onChange={(e) => handlePhoneChange(e)}
@@ -366,13 +323,13 @@ export default function Form() {
         </div>
         <br />
         <div
-          className="grid place-content-center"
+          className="grid justify-items-center"
           data-testid="supervisor-dropdown-section"
         >
           {getSupervisorDropDown()}
           <br />
           <input
-            className="bg-dark-grey-blue text-white rounded cursor-pointer"
+            className="bg-dark-grey-blue text-white rounded cursor-pointer w-28"
             type="submit"
             value="Submit"
             data-testid="submit-btn"
