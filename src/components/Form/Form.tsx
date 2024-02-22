@@ -8,43 +8,6 @@ import phoneValidation from "./FormFunctions/phoneValidation";
 import formatPhone from "./FormFunctions/formatPhone";
 import { SupervisorName } from "./FormTypes/SupervisorName";
 
-// const emailValidation = (email: string) => {
-//   const atIndex = email.indexOf("@");
-//   if (atIndex === -1 || atIndex === 0 || atIndex === email.length - 1) {
-//     return false; // No "@" or "@" at the beginning/end
-//   }
-
-//   const domain = email.substring(atIndex + 1);
-//   if (domain.indexOf(".") === -1) {
-//     return false; // No "." in the domain
-//   }
-
-//   return true;
-// };
-
-// const phoneValidation = (phone: string) => {
-//   const numbers = phone.match(/\d/g)?.length || 0;
-
-//   if (numbers < 9) {
-//     return false;
-//   }
-
-//   return true;
-// };
-
-// const formatPhone = (value: string) => {
-//   if (!value) return value;
-
-//   const phone = value.replace(/[^\d]/g, "");
-//   const phoneLength = phone.length;
-
-//   if (phoneLength < 4) return phone;
-//   if (phoneLength < 7) {
-//     return `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
-//   }
-//   return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
-// };
-
 export default function Form() {
   const [fName, setFName] = useState("");
   const [fNameBlurred, setFNameBlurred] = useState(false);
@@ -67,7 +30,6 @@ export default function Form() {
   const [phoneCheck, setPhoneCheck] = useState(false);
 
   const [supervisorData, setSupervisorData] = useState<SupervisorName[]>([]);
-  // const [supervisorNames, setSupervisorNames] = useState([]);
   const [supervisor, setSupervisor] = useState("select");
 
   useEffect(() => {
@@ -103,8 +65,6 @@ export default function Form() {
   const getSupervisorDropDown = () => {
     if (supervisorData !== undefined && supervisorData.length > 3) {
       const supervisorNames = supervisorData;
-
-      // console.log("supervisorNames: " + supervisorNames);
 
       const supervisors = supervisorNames.map((item) => {
         const selectItems = {
