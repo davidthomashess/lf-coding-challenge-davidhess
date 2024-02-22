@@ -228,6 +228,7 @@ export default function Form() {
     event.preventDefault();
 
     const postData = [fName, lName, email, phone, supervisor];
+    console.log(`Submitted data captured: ${postData}`);
 
     fetch("https://o3m5qixdng.execute-api.us-east-1.amazonaws.com/api/submit", {
       method: "POST",
