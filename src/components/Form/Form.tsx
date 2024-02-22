@@ -2,53 +2,48 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import Select, { SingleValue } from "react-select";
+import throwEx from "@/Functions/Throw/throwEx";
+import emailValidation from "./FormFunctions/emailValidation";
+import phoneValidation from "./FormFunctions/phoneValidation";
+import formatPhone from "./FormFunctions/formatPhone";
+import { SupervisorName } from "./FormTypes/SupervisorName";
 
-const throwEx = (msg: string) => {
-  throw Error(msg);
-};
+// const emailValidation = (email: string) => {
+//   const atIndex = email.indexOf("@");
+//   if (atIndex === -1 || atIndex === 0 || atIndex === email.length - 1) {
+//     return false; // No "@" or "@" at the beginning/end
+//   }
 
-const emailValidation = (email: string) => {
-  const atIndex = email.indexOf("@");
-  if (atIndex === -1 || atIndex === 0 || atIndex === email.length - 1) {
-    return false; // No "@" or "@" at the beginning/end
-  }
+//   const domain = email.substring(atIndex + 1);
+//   if (domain.indexOf(".") === -1) {
+//     return false; // No "." in the domain
+//   }
 
-  const domain = email.substring(atIndex + 1);
-  if (domain.indexOf(".") === -1) {
-    return false; // No "." in the domain
-  }
+//   return true;
+// };
 
-  return true;
-};
+// const phoneValidation = (phone: string) => {
+//   const numbers = phone.match(/\d/g)?.length || 0;
 
-const phoneValidation = (phone: string) => {
-  const numbers = phone.match(/\d/g)?.length || 0;
+//   if (numbers < 9) {
+//     return false;
+//   }
 
-  if (numbers < 9) {
-    return false;
-  }
+//   return true;
+// };
 
-  return true;
-};
+// const formatPhone = (value: string) => {
+//   if (!value) return value;
 
-const formatPhone = (value: string) => {
-  if (!value) return value;
+//   const phone = value.replace(/[^\d]/g, "");
+//   const phoneLength = phone.length;
 
-  const phone = value.replace(/[^\d]/g, "");
-  const phoneLength = phone.length;
-
-  if (phoneLength < 4) return phone;
-  if (phoneLength < 7) {
-    return `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
-  }
-  return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
-};
-
-interface SupervisorName {
-  title: string;
-  first: string;
-  last: string;
-}
+//   if (phoneLength < 4) return phone;
+//   if (phoneLength < 7) {
+//     return `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
+//   }
+//   return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
+// };
 
 export default function Form() {
   const [fName, setFName] = useState("");
@@ -119,31 +114,6 @@ export default function Form() {
         return selectItems;
       });
 
-      // console.log(supervisors);
-
-      // return (
-      //   <label>
-      //     <select
-      //       name="supervisors"
-      //       id="supervisors"
-      //       onChange={(e) => handleSupervisorNames(e)}
-      //       data-testid="supervisor-dropdown"
-      //     >
-      //       <option value="select">Select...</option>
-      //       {supervisors}
-      //     </select>
-      //   </label>
-      // );
-
-      // const supervisors = supervisorNames.map((item) => {
-      //   return {
-      //     value: `${item.first.toLowerCase()}${item.last.toLowerCase()}`,
-      //     label: `${item.first} ${item.last}`,
-      //   };
-      // });
-
-      // console.log("supervisors: " + supervisorNames);
-
       return (
         <Select
           className="w-48"
@@ -213,10 +183,6 @@ export default function Form() {
     }
     setEmailBlurred(true);
   };
-
-  // const [phone, setPhone] = useState("");
-  // const [isPhoneValid, setIsPhoneValid] = useState(true);
-  // const [isPhonePopulated, setIsPhonePopulated] = useState(true);
 
   const handlePhoneCheck = (event: React.SyntheticEvent) => {
     const target = event.target as HTMLInputElement;
