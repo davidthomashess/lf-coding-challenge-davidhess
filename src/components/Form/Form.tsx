@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const throwEx = (msg: string) => {
   throw Error(msg);
@@ -48,7 +48,40 @@ const formatPhone = (value: string) => {
   return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
 };
 
+interface SupervisorName {
+  title: string;
+  first: string;
+  last: string;
+}
+
 export default function Form() {
+  const [supervisorData, setSupervisorData] = useState();
+
+  useEffect(() => {
+    fetch(
+      "https://o3m5qixdng.execute-api.us-east-1.amazonaws.com/api/supervisors"
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        const nameData = data
+          .map((result: { name: SupervisorName }) => {
+            setSupervisorData(nameData);
+          })
+          .catch((error: unknown) => {
+            if (error instanceof Error) {
+              console.error(error);
+            }
+          });
+      });
+  }, []);
+
+  const supervisorNames: [SupervisorName] =
+    supervisorData || throwEx("Supervisor data not found!");
+
+  console.log(supervisorNames);
+
   const [fName, setFName] = useState("");
   const [fNameBlurred, setFNameBlurred] = useState(false);
   const [isFNamePopulated, setIsFNamePopulated] = useState(true);
