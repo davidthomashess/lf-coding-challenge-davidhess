@@ -25,7 +25,7 @@ const phoneValidation = (phone: string) => {
 
   console.log("numbers: " + numbers);
 
-  if (numbers < 10) {
+  if (numbers < 9) {
     console.log("invalid phone");
     return false;
   }
@@ -63,6 +63,7 @@ export default function Form() {
   const [isEmailPopulated, setIsEmailPopulated] = useState(true);
 
   const [phone, setPhone] = useState("");
+  const [phoneBlurred, setPhoneBlurred] = useState(false);
   const [isPhoneValid, setIsPhoneValid] = useState(true);
   const [isPhonePopulated, setIsPhonePopulated] = useState(true);
 
@@ -127,9 +128,20 @@ export default function Form() {
     const target = event.target as HTMLInputElement;
     const formattedPhone = formatPhone(target.value);
 
+    setPhoneBlurred(false);
+
     setPhone(formattedPhone);
 
     setIsPhoneValid(phoneValidation(phone));
+  };
+
+  const handlePhoneBlurred = () => {
+    if (phone === "") {
+      setIsPhonePopulated(false);
+    } else {
+      setIsPhonePopulated(true);
+    }
+    setPhoneBlurred(true);
   };
 
   console.log(`phone: ${phone}`);
@@ -220,10 +232,22 @@ export default function Form() {
             </p>
             <input
               type="text"
-              onChange={(e) => handlePhoneChange(e)}
               value={phone}
+              onChange={(e) => handlePhoneChange(e)}
+              onBlur={() => {
+                handlePhoneBlurred();
+              }}
               data-testid="form-phone-input"
             />
+            <p className="text-red-600">
+              {phoneBlurred
+                ? !isPhonePopulated
+                  ? "Email is empty!"
+                  : !isPhoneValid
+                  ? "Invalid Email!"
+                  : ""
+                : ""}
+            </p>
           </label>
         </div>
         <br />
@@ -237,6 +261,7 @@ export default function Form() {
               id="supervisors"
               data-testid="supervisor-dropdown"
             >
+              <option value="select">Select...</option>
               <option value="fredstark">Fred Stark</option>
               <option value="mattgreen">Matt Green</option>
               <option value="charliehue">Charlie Hue</option>
